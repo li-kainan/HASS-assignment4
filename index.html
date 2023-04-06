@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<!-- saved from url=(0075)https://chi-loong.github.io/HASS02.526/assignments/assignment4-starter.html -->
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<style>
+			h1, h2 {
+				width: 1280px;
+				font-family: Century Gothic;
+				color: #000000;
+				font-size: 48px;
+				margin-bottom: 0.2em;
+			}
+			h2 {
+				font-size: 24px;
+				margin-top: 0em;
+			}
+			p {
+				font-family: Century Gothic;
+				font-size: 16px;
+			}
+			.legend {
+				width: 40px;
+				height: 20px;
+				font-size: 12px;
+				border: 1px solid black;
+				margin-left: 1em;
+				margin-top: 0.5em;
+			}	
+			.legend_label {
+				font-family: Century Gothic;
+				font-size: 12px;
+				height: 22px;
+				margin-left: 1em;
+				margin-top: 0.5em;
+			}
+			#tooltip {
+				font-family: Century Gothic;
+				font-size: 12px;
+				background: #FFFFFF;
+				border: 1px solid black;
+				border-radius: 5px;
+				padding: 5px;
+			}
+			.class1 {fill: #800000;}
+			.class2 {fill: #C00000;}
+			.class3 {fill: #FF0000;}
+			.class4 {fill: #FF6060;}
+			.class5 {fill: #FF8080;}
+			.class6 {fill: #FFA8A8;}
+			.class7 {fill: #FFC8C8;}
+			.class8 {fill: #FFF0F0;}
+			.class9 {fill: Silver;}
+		</style>
+	<title>Assignment 4: Singapore Population Choropleth</title>
+	</head>
+	<body style="text-align:center; padding: 0px 40px">
+		<div align="left" style="width: 1440px;">
+			<h1>Assignment 3: Data Visualization</h1>
+			<h2>Li Kainan (1002247)</h2>
+			
+			<article style="float:left; width: 1080px;">
+				<svg viewBox="0 0 1000 600"></svg>
+			</article>
+			
+			<article style="float:left; width: 360px;">
+				<div style="height: 60px;"></div>
+				<p><b>Legend:</b></p>
+				
+				<article style="float:left;">
+					<div class="legend" style="background: #800000; margin-top: 0.6em;" onmousemove="legend_hover_on('class1')" onmouseout="legend_hover_off()"></div>
+					<div class="legend" style="background: #C00000" onmousemove="legend_hover_on('class2')" onmouseout="legend_hover_off()"></div>
+					<div class="legend" style="background: #FF0000" onmousemove="legend_hover_on('class3')" onmouseout="legend_hover_off()"></div>
+					<div class="legend" style="background: #FF6060" onmousemove="legend_hover_on('class4')" onmouseout="legend_hover_off()"></div>
+					<div class="legend" style="background: #FF8080" onmousemove="legend_hover_on('class5')" onmouseout="legend_hover_off()"></div>
+					<div class="legend" style="background: #FFA8A8" onmousemove="legend_hover_on('class6')" onmouseout="legend_hover_off()"></div>
+					<div class="legend" style="background: #FFC8C8" onmousemove="legend_hover_on('class7')" onmouseout="legend_hover_off()"></div>
+					<div class="legend" style="background: #FFF0F0" onmousemove="legend_hover_on('class8')" onmouseout="legend_hover_off()"></div>
+					<div class="legend" style="background: Silver" onmousemove="legend_hover_on('class9')" onmouseout="legend_hover_off()"></div>
+					<article style="float:right;">
+						<div class="legend_label" style="font-size: 14px; color: #BBBBBB"">↑</div>
+					</article>
+				</article>
+				<article style="float:left; width: 300px">
+					<div class="legend_label">> 40,000 /km<sup>2</sup></div>
+					<div class="legend_label">30,000 - 40,000 /km<sup>2</sup></div>	
+					<div class="legend_label">20,000 - 30,000 /km<sup>2</sup></div>
+					<div class="legend_label">15,000 - 20,000 /km<sup>2</sup></div>
+					<div class="legend_label">10,000 - 15,000 /km<sup>2</sup></div>
+					<div class="legend_label">5,000 - 10,000 /km<sup>2</sup></div>
+					<div class="legend_label">100 - 5,000 /km<sup>2</sup></div>
+					<div class="legend_label">0 - 100 /km<sup>2</sup> <i>(excluding 0)</i></div>
+					<div class="legend_label">0 /km<sup>2</sup></div>
+					<div class="legend_label" style="font-size: 16px; color: #BBBBBB"><i>Hover me</i></div>
+				</article>
+			</article>
+			<div id="tooltip" align="left" style="position: absolute; display: none;"></div>
+		</div>
+		<script src="./index_files/d3.v7.min.js.download"></script>
+		<script>
+
+		let width = 1000, height = 600;
+
+		let svg = d3.select("svg")
+			.attr("viewBox", "0 0 " + width + " " + height)
+
+		function get_class(unit_pop) {
+			if (unit_pop == 0) {
+				return "class9"
+			} else if (unit_pop < 100) {
+				return "class8"
+			} else if (unit_pop < 5000) {
+				return "class7"
+			} else if (unit_pop < 10000) {
+				return "class6"
+			} else if (unit_pop < 15000) {
+				return "class5"
+			} else if (unit_pop < 20000) {
+				return "class4"
+			} else if (unit_pop < 30000) {
+				return "class3"
+			} else if (unit_pop < 40000) {
+				return "class2"
+			} else {
+				return "class1"
+			}
+		}
+
+		function showTooltip(evt, name, planning_area, pop, area, unit_pop) {
+			let tooltip = document.getElementById("tooltip");
+			raw_name = name.replace("!", "'")
+			name = raw_name.toLowerCase()
+			name = name.split(" ")
+			for (let i = 0; i < name.length; i++) {
+				name[i] = name[i].charAt(0).toUpperCase() + name[i].slice(1)
+			}
+			name = name.join(" ")
+			
+			if (parseInt(pop) > 10000) {
+				pop = (parseInt(pop) / 1000).toFixed(1).toString() + "k"
+			}
+			if (parseFloat(unit_pop) > 10000) {
+				unit_pop = (parseFloat(unit_pop) / 1000).toFixed(1).toString() + "k"
+			}
+			
+			text = ""
+			text += "<b>" + name + "</b>, "
+			text += "<b>" + planning_area + "</b><br><br>"
+			text += "Population: " + pop + "<br>"
+			text += "Area: " + area + " km<sup>2</sup><br>"
+			text += "Density: " + unit_pop + " /km<sup>2</sup><br>"
+			
+			tooltip.innerHTML = text;
+			tooltip.style.display = "block";
+			tooltip.style.left = evt.pageX + 10 + 'px';
+			tooltip.style.top = evt.pageY + 10 + 'px';
+			
+			individuals = document.querySelectorAll('path')
+			for (const individual of individuals) {
+				individual.style.opacity = 0.2
+			}
+			
+			shape = document.getElementById(raw_name);
+			shape.style.opacity = 1	
+		}
+
+		function hideTooltip() {
+			let tooltip = document.getElementById("tooltip");
+			tooltip.style.display = "none";
+			
+			individuals = document.querySelectorAll('path')
+			for (const individual of individuals) {
+				individual.style.opacity = 1
+			}
+		}
+		
+		function legend_hover_on(legend_class) {
+			individuals = document.querySelectorAll('path')
+			for (const individual of individuals) {
+				individual.style.opacity = 0.1
+			}
+			
+			individuals = document.getElementsByClassName(legend_class)
+			for (const individual of individuals) {
+				individual.style.opacity = 1
+			}
+		}
+		
+		function legend_hover_off() {
+			individuals = document.querySelectorAll('path')
+			for (const individual of individuals) {
+				individual.style.opacity = 1
+			}
+		}
+		
+		// Load external data and boot
+		Promise.all([d3.json("sgmap.json"), d3.csv("population2022.csv")]).then(data => {
+
+		let mapData = data[0].features;
+		let popData = data[1];
+
+		bukit_merah_actual_area = 14.34 //km2
+		bukit_merah_shape_area = 0
+		for (let i = 0; i < mapData.length; i++) {
+			if (mapData[i].properties["Planning Area Name"] == "BUKIT MERAH") {
+				bukit_merah_shape_area += parseFloat(mapData[i].properties["SHAPE_Area"])
+			}
+		}
+		bukit_merah_unit_area = bukit_merah_shape_area / bukit_merah_actual_area
+
+		// Merge pop data with map data
+		mapData.forEach(d => {
+		  let subzone = popData.find(e => e.Subzone.toUpperCase() == d.properties.Name);
+		  d.pop = (subzone != undefined) ? parseInt(subzone.Population) : 0;
+		  d.area = (d.properties.SHAPE_Area / bukit_merah_unit_area).toFixed(2)
+		  d.unit_pop = (d.pop / d.area).toFixed(2)
+		  d.class = get_class(d.unit_pop)
+		})
+
+		unit_pop_max = 0
+		for (let i = 0; i < mapData.length; i++) {
+			unit_pop_max = Math.max(unit_pop_max, mapData[i].unit_pop)
+		}
+
+		console.log(mapData);
+
+		// Map and projection
+		let projection = d3.geoMercator()
+			.center([103.851959, 1.290270])
+			.fitExtent([[20, 20], [980, 580]], data[0]);
+
+		let geopath = d3.geoPath().projection(projection);
+
+		svg.append("g")
+			.selectAll("path")
+			.data(mapData)
+			.enter()
+			.append("path")
+			.attr("id", function(d){return(d.properties.Name)})
+			.attr("class", function(d){return(d.class)})
+			.attr("d", geopath)
+			.attr("stroke", "black")
+			.attr("onmousemove", function(d){return("showTooltip(evt, '" + d.properties.Name.replace("'", "!") + "', '" + d.properties["Planning Area Name"] + "', " + d.pop.toString() + ", " + d.area.toString() + ", " + d.unit_pop.toString() + ");")})
+			.attr("onmouseout", "hideTooltip();")
+		})
+
+		</script>
+	</body>
+</html>
